@@ -1,0 +1,19 @@
+# Configuración centralizada de rutas
+
+paths:
+  # Datos raw
+  reqs_csv: "C:\\Users\\r-g-r\\Desktop\\Personal_portfolio\\QA_PRIVATE_TOOL\\qa_knowledge_engine\\data\\raw\\doors_exports\\reqs.csv"
+  clusters_csv: "C:\\Users\\r-g-r\\Desktop\\Personal_portfolio\\QA_PRIVATE_TOOL\\qa_knowledge_engine\\data\\raw\\doors_exports\\clusters.csv"
+  
+  # Datos procesados
+  matches_csv: "C:\\Users\\r-g-r\\Desktop\\Personal_portfolio\\QA_PRIVATE_TOOL\\qa_knowledge_engine\\data\\processed\\matches.csv"
+  summary_csv: "C:\\Users\\r-g-r\\Desktop\\Personal_portfolio\\QA_PRIVATE_TOOL\\qa_knowledge_engine\\data\\processed\\summary.csv"
+  excel_report: "C:\\Users\\r-g-r\\Desktop\\Personal_portfolio\\QA_PRIVATE_TOOL\\qa_knowledge_engine\\data\\processed\\summary.xlsx"
+  
+  # Reportes HTML
+  dashboard_html: "reports/dashboard.html"
+  
+# Parámetros de umbral
+thresholds:
+  duplicate: 90
+  similar: 80

@@ -1,0 +1,12 @@
+SECURITY:
+  - conflicts_with: USABILITY
+    keywords:
+      - limit
+      - restrict
+      - enforce
+USABILITY:
+  - conflicts_with: SECURITY
+    keywords:
+      - easy
+      - fast
+      - no restriction
