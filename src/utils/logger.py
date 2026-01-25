@@ -1,6 +1,5 @@
 import logging
 import sys
-
 # Logger centralizado para toda la herramienta
 def get_logger(name="qa_engine"):
     """Obtiene o crea el logger centralizado"""

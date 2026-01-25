@@ -1,0 +1,32 @@
+ambiguity:
+  enabled: true
+
+  weak_verbs:
+    # Verbos que indican intención sin obligación verificable
+    - should        # recomendación sin obligatoriedad
+    - may           # permiso ambiguo
+    - might         # posibilidad no determinista
+
+  vague_terms:
+    # Términos subjetivos sin criterio medible
+    - simple        # depende del evaluador
+    - fast          # sin unidad de tiempo
+    - intuitive     # percepción humana no medible
+    - efficient     # sin métrica asociada
+    - adequate      # cumple según quién
+
+  open_conditions:
+    # Condiciones que evitan trazabilidad
+    - if applicable     # no define cuándo aplica
+    - as required       # no define quién requiere
+    - where possible    # introduce escape técnico
+
+  scoring:
+    weak_verb: 2
+    vague_term: 2
+    open_condition: 1
+    no_measurement: 2   # ↑ más peso: clave para V&V
+
+  thresholds:
+    review: 2           # evita ruido innecesario
+    ambiguous: 4        # ambigüedad real, no trivial

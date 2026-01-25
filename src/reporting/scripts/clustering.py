@@ -1,17 +1,16 @@
 import pandas as pd
 from collections import defaultdict
 
-def build_clusters(df, min_type=("SIMILAR", "DUPLICATE")):
+def build_clusters(
+    df,
+    all_ids=None,
+    min_type=("SIMILAR", "DUPLICATE"),
+    cluster_prefix="CLUSTER_AUTHENTICATION_ACCESS"
+):
     """
-    Construye clusters de requisitos basados en matches similares/duplicados
-    
-    Args:
-        df: DataFrame con columnas ID1, ID2, Match_Type
-        min_type: Tuple de tipos de match a considerar
-    
-    Returns:
-        List de sets, cada uno es un cluster de requirement_ids
+    Build requirement clusters based on similarity/duplicate matches
     """
+
     graph = defaultdict(set)
 
     for _, row in df.iterrows():
@@ -35,5 +34,18 @@ def build_clusters(df, min_type=("SIMILAR", "DUPLICATE")):
                     stack.extend(graph[current] - visited)
 
             clusters.append(cluster)
+                
+    # Add singletons (no matches)
+    if all_ids:
+        matched = set().union(*clusters) if clusters else set()
+        for rid in set(all_ids) - matched:
+            clusters.append({rid})
 
-    return clusters
+    # Assign readable cluster names
+    named_clusters = {}
+    for i, cluster in enumerate(clusters, start=1):
+        cluster_name = f"{cluster_prefix}_{i:02d}"
+        for rid in cluster:
+            named_clusters[rid] = cluster_name
+
+    return named_clusters

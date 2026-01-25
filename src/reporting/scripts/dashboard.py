@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from datetime import datetime
 # Leer clusters
 clusters_df = pd.read_csv(r"C:\Users\r-g-r\Desktop\Personal_portfolio\QA_PRIVATE_TOOL\qa_knowledge_engine\data\raw\doors_exports\clusters.csv")
 cluster_map = {}
@@ -37,6 +38,9 @@ conflicted_clusters = {
 OUTPUT_HTML = "reports/dashboard.html"
 os.makedirs("reports", exist_ok=True)
 
+# Obtener fecha y hora actual
+current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 summary = df['Match_Type'].value_counts().to_dict()
 
 # Preparar clusters para HTML
@@ -67,6 +71,7 @@ html = f"""
 <body>
 
 <h1>QA Requirement Similarity Dashboard</h1>
+<p><strong>Generated on:</strong> {current_datetime}</p>
 
 <h2>Summary</h2>
 <ul>
@@ -137,4 +142,4 @@ html += """
 with open(OUTPUT_HTML, "w", encoding="utf-8") as f:
     f.write(html)
 
-print(f"Dashboard generado en {OUTPUT_HTML}")
+print(f"Dashboard generated at {OUTPUT_HTML}")
