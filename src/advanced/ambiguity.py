@@ -11,6 +11,46 @@ WEAK_VERBS = ambiguity_config['ambiguity']['weak_verbs']
 VAGUE_TERMS = ambiguity_config['ambiguity']['vague_terms']
 OPEN_CONDITIONS = ambiguity_config['ambiguity']['open_conditions']
 
+# Icon thresholds from config
+ICON_THRESHOLDS = ambiguity_config['ambiguity']['thresholds']
+
+def has_measurement(text: str) -> bool:
+    """
+    Check if requirement text contains measurable criteria.
+    """
+    # Patterns that indicate measurable criteria
+    measurement_patterns = [
+        r'\d+',  # numbers
+        r'\b\d+\s*(seconds?|minutes?|hours?|days?|weeks?|months?|years?)\b',  # time units
+        r'\b\d+\s*(mb|gb|kb|bytes?|pixels?|percent|%)\b',  # data/size units
+        r'\b\d+\s*(users?|requests?|connections?|items?)\b',  # countable items
+        r'\b(at least|at most|maximum|minimum|between|within)\b',  # quantitative constraints
+        r'\b\d+\.\d+\b',  # decimal numbers
+        r'\b\d+/\d+\b',  # fractions
+    ]
+
+    return any(re.search(pattern, text, re.IGNORECASE) for pattern in measurement_patterns)
+
+def get_icon_thresholds():
+    """
+    Get icon display thresholds from configuration.
+    Returns dict with 'review' and 'ambiguous' thresholds.
+    """
+    return ICON_THRESHOLDS
+
+def get_ambiguity_icons(score):
+    """
+    Return icons based on ambiguity score using configured thresholds.
+    """
+    thresholds = get_icon_thresholds()
+    
+    if score >= thresholds['ambiguous']:
+        return " 🟠"  # high ambiguity - needs rewrite
+    elif score >= thresholds['review']:
+        return " 🔎"  # moderate ambiguity - needs review
+    else:
+        return ""  # no icon
+
 def detect_ambiguity(requirement_text: str) -> dict:
     """
     MVP ambiguity detector.

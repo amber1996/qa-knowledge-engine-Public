@@ -2,34 +2,33 @@
 
 import pandas as pd
 import os
-from utils.logger import get_logger
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-def generate_summary_report(matches_csv=r"C:\Users\r-g-r\Desktop\Personal_portfolio\QA_PRIVATE_TOOL\qa_knowledge_engine\data\processed\matches.csv",
-                            summary_csv=r"C:\Users\r-g-r\Desktop\Personal_portfolio\QA_PRIVATE_TOOL\qa_knowledge_engine\data\processed\summary.csv",
-                            excel_report=r"C:\Users\r-g-r\Desktop\Personal_portfolio\QA_PRIVATE_TOOL\qa_knowledge_engine\data\processed\summary.xlsx"):
-    # Crear carpeta si no existe
+def generate_summary_report(matches_csv, summary_csv, excel_report):
+    # Create folder if it doesn't exist
     os.makedirs(os.path.dirname(summary_csv), exist_ok=True)
 
-    logger.info(f"Cargando matches desde: {matches_csv}")
+    logger.info(f"Loading matches from: {matches_csv}")
     df = pd.read_csv(matches_csv)
 
-    # Resumen por tipo
+    # Summary by type
     summary = df['Match_Type'].value_counts().reset_index()
     summary.columns = ['Match_Type', 'Count']
-    logger.info(f"Resumen:\n{summary}")
+    logger.info(f"Summary:\n{summary}")
 
-    # Guardar resumen en CSV
+    # Save summary in CSV
     summary.to_csv(summary_csv, index=False)
-    logger.info(f"Resumen guardado en CSV: {summary_csv}")
-  # Guardar detalle con colores en Excel (duplicados rojos, similares amarillos)
+    logger.info(f"Summary saved in CSV: {summary_csv}")
+
+    # Save detail with colors in Excel (duplicates red, similar yellow, different green)
     with pd.ExcelWriter(excel_report, engine='xlsxwriter') as writer:
         df.to_excel(writer, sheet_name='Matches', index=False)
-        workbook  = writer.book
+        workbook = writer.book
         worksheet = writer.sheets['Matches']
 
-        # Formato colores
+        # Color formats
         red_format = workbook.add_format({'bg_color': '#FF9999'})
         yellow_format = workbook.add_format({'bg_color': '#FFFF99'})
         green_format = workbook.add_format({'bg_color': '#99FF99'})
@@ -37,7 +36,7 @@ def generate_summary_report(matches_csv=r"C:\Users\r-g-r\Desktop\Personal_portfo
             if match_type == "DUPLICATE":
                 worksheet.set_row(row_num, cell_format=red_format)
             elif match_type == "SIMILAR":
-                  worksheet.set_row(row_num, cell_format=yellow_format)
-            if match_type == "DIFFERENT":
+                worksheet.set_row(row_num, cell_format=yellow_format)
+            elif match_type == "DIFFERENT":
                 worksheet.set_row(row_num, cell_format=green_format)
-    logger.info(f"Reporte Excel generado: {excel_report}")
+    logger.info(f"Excel report generated: {excel_report}")

@@ -1,19 +1,18 @@
 # src/ingestion/loader_normalizer.py
 
 import csv
-import unicodedata
+import os
 import re
-from utils.logger import get_logger
+import unicodedata
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-# --- STOPWORDS comunes para requisitos ---
+# Common stopwords for requirements
 STOPWORDS = {"the", "shall", "must", "should", "and", "to", "all", "after", "before", "be", "using"}
 
-# --- Funciones ---
-
 def remove_accents(text):
-    """Quita acentos y tildes del texto"""
+    """Remove accents and diacritics from text."""
     return ''.join(
         c for c in unicodedata.normalize('NFD', text)
         if unicodedata.category(c) != 'Mn'
@@ -21,51 +20,79 @@ def remove_accents(text):
 
 def normalize_text(text):
     """
-    Normaliza texto de requisito:
-    - Lowercase
-    - Quita acentos
-    - Quita stopwords
-    - Solo letras y números
+    Normalize requirement text:
+    - Convert to lowercase
+    - Remove accents
+    - Remove stopwords
+    - Keep only letters and numbers
     """
     text = text.lower()
     text = remove_accents(text)
-    # Quitar todo lo que no sea letras, números o espacios
+    # Remove everything that is not letters, numbers, or spaces
     text = re.sub(r'[^a-z0-9\s]', '', text)
-    # Tokenizar y eliminar stopwords
+    # Tokenize and remove stopwords
     tokens = [t for t in text.split() if t not in STOPWORDS]
-    # Reordenar tokens alfabéticamente (opcional, mejora matching)
+    # Sort tokens alphabetically (optional, improves matching)
     tokens.sort()
     normalized = ' '.join(tokens)
     return normalized
 
 def load_requirements(csv_path):
     """
-    Carga CSV de requisitos y devuelve lista de diccionarios con:
+    Load requirements from CSV and return a list of dictionaries with:
     - id
     - source
     - original_text
     - normalized_text
     """
     requirements = []
-    logger.info(f"Cargando requisitos desde: {csv_path}")
-    with open(csv_path, mode='r', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            original = row['text']
-            normalized = normalize_text(original)
-            requirements.append({
-                'id': row['id'],
-                'source': 'doors_exports',
-                'original_text': original,
-                'normalized_text': normalized
-            })
-            logger.debug(f"{row['id']} | Normalizado: {normalized}")
-    logger.info(f"Total requisitos cargados: {len(requirements)}")
-    return requirements
+    logger.info(f"Loading requirements from: {csv_path}")
 
-# --- Test rápido ---
-if __name__ == "__main__":
-    csv_file = r"C:\Users\r-g-r\Desktop\Personal_portfolio\QA_PRIVATE_TOOL\qa_knowledge_engine\data\raw\doors_exports\reqs.csv"
-    reqs = load_requirements(csv_file)
-    for r in reqs:
-        print(f"{r['id']} | {r['normalized_text']}")
+    # Check if the file exists
+    if not os.path.exists(csv_path):
+        logger.critical(f"CRITICAL_ERROR: Requirements CSV file does not exist: {csv_path}")
+        logger.info("Run aborted safely - Cannot continue without requirements CSV file")
+        raise FileNotFoundError(f"CSV file does not exist: {csv_path}")
+
+    try:
+        with open(csv_path, mode='r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+
+            # Verify required columns are present
+            if 'id' not in reader.fieldnames or 'text' not in reader.fieldnames:
+                logger.critical("CRITICAL_ERROR: CSV does not have required 'id' and 'text' columns for RQS format")
+                logger.info("Run aborted safely - Invalid CSV format for requirements")
+                raise ValueError("CSV does not have required 'id' and 'text' columns")
+
+            for row_num, row in enumerate(reader, start=2):  # start=2 because header is 1
+                req_id = row.get('id', '').strip()
+                original = row.get('text', '').strip()
+
+                # Verify required fields are not empty
+                if not req_id:
+                    logger.error(f"ERROR: Row {row_num}: 'id' field is empty")
+                    logger.info("Run aborted safely - Incomplete requirements data")
+                    raise ValueError(f"Row {row_num}: 'id' field is empty")
+                if not original:
+                    logger.error(f"ERROR: Row {row_num}: 'text' field is empty")
+                    logger.info("Run aborted safely - Incomplete requirements data")
+                    raise ValueError(f"Row {row_num}: 'text' field is empty")
+
+                normalized = normalize_text(original)
+                requirements.append({
+                    'id': req_id,
+                    'source': 'doors_exports',
+                    'original_text': original,
+                    'normalized_text': normalized
+                })
+                logger.debug(f"{req_id} | Normalized: {normalized}")
+    except Exception as e:
+        logger.error(f"Error loading CSV: {e}")
+        raise
+
+    if not requirements:
+        logger.error("No valid requirements found in CSV")
+        raise ValueError("No valid requirements found in CSV")
+
+    logger.info(f"Total requirements loaded: {len(requirements)}")
+    return requirements

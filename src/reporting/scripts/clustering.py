@@ -48,4 +48,4 @@ def build_clusters(
         for rid in cluster:
             named_clusters[rid] = cluster_name
 
-    return named_clusters
+    return clusters

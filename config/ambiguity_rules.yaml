@@ -28,5 +28,5 @@ ambiguity:
     no_measurement: 2   # ↑ más peso: clave para V&V
 
   thresholds:
-    review: 2           # evita ruido innecesario
-    ambiguous: 4        # ambigüedad real, no trivial
+    review: 3           # mostrar icono de revisión para scores >= 3
+    ambiguous: 4        # mostrar icono de ambigüedad alta para scores >= 4
